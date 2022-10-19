@@ -24,7 +24,6 @@ on:
 jobs:
   docker-service-update:
     name: Run docker service update ${{inputs.service-name}}
-    needs: [build]
     runs-on: ubuntu-latest
     steps:
     - name: Run docker service update

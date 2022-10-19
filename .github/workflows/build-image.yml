@@ -57,7 +57,7 @@ on:
 
 jobs:
   build-image:
-    name: Build and push image to ECR
+    name: Build and Push image to ECR
     runs-on: ubuntu-latest
     outputs:
       release-image: ${{steps.vars.outputs.release-image}}

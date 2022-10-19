@@ -1,4 +1,4 @@
-name: Reusable workflow to rollout to kubernetes cluster
+name: Reusable workflow to rollout to k8s cluster
 on:
   workflow_call:
     inputs:
@@ -23,8 +23,10 @@ on:
 
 jobs:
   k8s-rollout:
-    name: Deploy to asura-stack (${{ inputs.stage }})
+    name: Rollout to k8s cluster
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ap-northeast-2
     steps:
     - uses: aws-actions/configure-aws-credentials@v1
       with:
