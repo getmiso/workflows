@@ -1,0 +1,56 @@
+name: Reusable workflow to run docker service update
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: "Stage to deploy: *production|staging*"
+        required: true
+        type: string
+      image:
+        type: string
+        required: true
+      service-name:
+        type: string
+        required: true
+      server-name:
+        type: string
+        required: true
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+jobs:
+  docker-service-update:
+    name: Run docker service update ${{inputs.service-name}}
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Run docker service update
+      id: send-command
+      uses: nohmad/aws-ssm-send-command-action@master
+      with:
+        aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+        aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        aws-region: ap-northeast-2
+        targets: |
+          [{"Key": "tag:Name", "Values": ["${{inputs.server-name}}"]}]
+        document-name: AWS-RunShellScript
+        parameters: |
+          {
+            "commands": [
+              "cat <<END | su -s /bin/bash ssm-user",
+              "docker system prune --force > /dev/null",
+              "docker service update --quiet --image ${{inputs.image}} --with-registry-auth \\",
+              "  --update-failure-action rollback --update-order start-first ${{inputs.service-name}} > /dev/null",
+              "docker service inspect --format '{{json .UpdateStatus}}' ${{inputs.service-name}}",
+              "END"
+            ]
+          }
+    - name: Exit if failed
+      run: exit 1
+      if: ${{ steps.send-command.outputs.status != 'Success' }}
+    - name: Verify the final command
+      run: |
+        echo "${{toJSON(steps.send-command.outputs)}}"
