@@ -57,9 +57,9 @@ on:
       AWS_SECRET_ACCESS_KEY:
         required: true
     outputs:
-      release-image:
-        description: Release image
-        value: ${{jobs.build-image.outputs.release-image}}
+      # release-image:
+      #   description: Release image
+      #   value: ${{jobs.build-image.outputs.release-image}}
       release-version:
         description: Release version
         value: ${{jobs.build-image.outputs.release-version}}
@@ -69,7 +69,7 @@ jobs:
     name: Deploy to EKS / ${{inputs.stage}}
     runs-on: ubuntu-latest
     outputs:
-      release-image: ${{steps.vars.outputs.release-image}}
+      # release-image: ${{steps.vars.outputs.release-image}}
       release-version: ${{steps.vars.outputs.release-version}}
     steps:
     - name: Validate inputs
@@ -87,11 +87,11 @@ jobs:
       id: vars
       run: |
         if [ "${{ inputs.stage }}" = "staging" ]; then
-          TAG_NAME=staging.$(date +%y%m).${GITHUB_SHA::7}
+          TAG_NAME="staging.$(date +%y%m).${GITHUB_SHA::7}"
         elif [ -n "${{ inputs.tag_name }}" ]; then
           TAG_NAME=${{ inputs.tag_name }}
         else
-          TAG_NAME=${{inputs.major-version}}.$(date +%y%m).${GITHUB_SHA::7}
+          TAG_NAME="${{inputs.major-version}}.$(date +%y%m).${GITHUB_SHA::7}"
         fi
         echo "base-image=${{steps.login-ecr.outputs.registry}}/${{inputs.image-name}}" >> $GITHUB_OUTPUT
         echo "release-image=${{steps.login-ecr.outputs.registry}}/${{inputs.image-name}}:${TAG_NAME}" >> $GITHUB_OUTPUT
@@ -129,7 +129,7 @@ jobs:
         build-args: ${{inputs.docker-build-args}}
         push: true
         tags: |
-          ${{steps.vars.outputs.base-image}}:${{steps.vars.outputs.release-version}}
+          ${{steps.vars.outputs.release-image}}
           ${{steps.vars.outputs.base-image}}:${{steps.vars.outputs.major-version}}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
