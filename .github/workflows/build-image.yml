@@ -60,7 +60,7 @@ jobs:
     name: Build and push image to ECR
     runs-on: ubuntu-latest
     outputs:
-      release-image: steps.vars.outputs.release-image
+      release-image: ${{steps.vars.outputs.release-image}}
     steps:
     - name: Validate inputs
       run: exit 1
