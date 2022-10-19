@@ -50,6 +50,10 @@ on:
         required: true
       AWS_SECRET_ACCESS_KEY:
         required: true
+    outputs:
+      release-image:
+        description: Release image
+        value: ${{jobs.build-image.outputs.release-image}}
 
 jobs:
   build-image:
