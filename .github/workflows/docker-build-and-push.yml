@@ -19,8 +19,7 @@ on:
       config-path:
         required: false
         type: string
-        description:
-          Prefix of name of parameters, usually */config/app_name/production*.
+        description: Prefix of parameters' name, usually */config/app_name/production*.
       config-pattern:
         required: false
         type: string
@@ -28,11 +27,10 @@ on:
         required: false
         type: string
         default: dotenv
-      config-file:
+      config-filename:
         required: false
         type: string
-        description: |
-          Name of dotenv file to dump parameters retrieved by *inputs.config-prefix*
+        description: Name of dotenv file to dump parameters retrieved by *inputs.config-prefix*
       docker-context:
         required: false
         default: .
@@ -51,16 +49,20 @@ on:
       AWS_SECRET_ACCESS_KEY:
         required: true
     outputs:
-      release-image:
-        description: Release image
-        value: ${{jobs.build-image.outputs.release-image}}
+      # release-image:
+      #   description: Release image
+      #   value: ${{jobs.build-image.outputs.release-image}}
+      release-version:
+        description: Release version
+        value: ${{jobs.build-image.outputs.release-version}}
 
 jobs:
   build-image:
     name: Build and Push image to ECR
     runs-on: ubuntu-latest
     outputs:
-      release-image: ${{steps.vars.outputs.release-image}}
+      # release-image: ${{steps.vars.outputs.release-image}}
+      release-version: ${{steps.vars.outputs.release-version}}
     steps:
     - name: Validate inputs
       run: exit 1
@@ -77,11 +79,11 @@ jobs:
       id: vars
       run: |
         if [ "${{ inputs.stage }}" = "staging" ]; then
-          TAG_NAME=staging.$(date +%y%m).${GITHUB_SHA::7}
+          TAG_NAME="staging.$(date +%y%m).${GITHUB_SHA::7}"
         elif [ -n "${{ inputs.tag_name }}" ]; then
           TAG_NAME=${{ inputs.tag_name }}
         else
-          TAG_NAME=${{inputs.major-version}}.$(date +%y%m).${GITHUB_SHA::7}
+          TAG_NAME="${{inputs.major-version}}.$(date +%y%m).${GITHUB_SHA::7}"
         fi
         echo "base-image=${{steps.login-ecr.outputs.registry}}/${{inputs.image-name}}" >> $GITHUB_OUTPUT
         echo "release-image=${{steps.login-ecr.outputs.registry}}/${{inputs.image-name}}:${TAG_NAME}" >> $GITHUB_OUTPUT
@@ -97,7 +99,7 @@ jobs:
         aws-region: ap-northeast-2
         path: ${{inputs.config-path}}
         format: ${{inputs.config-format}}
-        filename: ${{inputs.config-file}}
+        filename: ${{inputs.config-filename}}
     - name: Cache Docker layers
       uses: actions/cache@v2
       with:
@@ -119,7 +121,7 @@ jobs:
         build-args: ${{inputs.docker-build-args}}
         push: true
         tags: |
-          ${{steps.vars.outputs.base-image}}:${{steps.vars.outputs.release-version}}
+          ${{steps.vars.outputs.release-image}}
           ${{steps.vars.outputs.base-image}}:${{steps.vars.outputs.major-version}}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new

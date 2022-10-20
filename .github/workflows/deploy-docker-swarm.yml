@@ -19,8 +19,7 @@ on:
       config-path:
         required: false
         type: string
-        description:
-          Prefix of name of parameters, usually */config/app_name/production*.
+        description: Prefix of parameters' name, usually */config/app_name/production*.
       config-pattern:
         required: false
         type: string
@@ -31,8 +30,7 @@ on:
       config-file:
         required: false
         type: string
-        description: |
-          Name of dotenv file to dump parameters retrieved by *inputs.config-prefix*
+        description: Name of dotenv file to dump parameters retrieved by *inputs.config-path*
       docker-context:
         required: false
         default: .
