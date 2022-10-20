@@ -1,0 +1,86 @@
+name: Deploy to AWS Lambda
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: staging | v[1-9][0-9]*
+        required: true
+        type: string
+        default: staging
+      config-path:
+        description: Prefix of name of parameters, usually */config/app_name/production*.
+        required: false
+        type: string
+      config-pattern:
+        description: Pattern to match to parameters retrieved
+        required: false
+        type: string
+      config-format:
+        description: dotenv / as-is
+        required: false
+        type: string
+        default: dotenv
+      config-filename:
+        description: Name of file to dump parameters retrieved by *inputs.config-path*
+        required: false
+        type: string
+        default: .env
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      NODE_AUTH_TOKEN:
+        required: false
+
+jobs:
+  deploy:
+    name: Deploy to AWS Lambda (${{ inputs.stage }})
+    strategy:
+      matrix:
+        node-version: [14]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Validate inputs
+      run: exit 1
+      if: ${{ !contains(fromJSON('["v1", "v2", "staging"]'), inputs.stage) }}
+
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        always-auth: true
+        registry-url: '//npm.pkg.github.com'
+        scope: '@getmiso'
+
+    - uses: actions/cache@v2
+      id: yarn-cache
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+    - name: Install dependencies
+      run: yarn install --immutable
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
+
+    - name: Prepare .env file
+      uses: nohmad/aws-ssm-parameter-store-action@v3
+      if: ${{inputs.config-path}}
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
+        path: ${{inputs.config-path}}
+        format: ${{inputs.config-format}}
+        filename: ${{inputs.config-filename}}
+
+    - name: Run command serverless deploy
+      run: |
+        set -eux
+        npx sls config credentials --provider aws \
+          --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        npx sls deploy --stage ${{inputs.stage}}

@@ -1,4 +1,4 @@
-name: Reusable workflow to build image
+name: Reusable workflow to build and push image
 on:
   workflow_call:
     inputs:

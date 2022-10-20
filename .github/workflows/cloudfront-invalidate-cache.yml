@@ -1,0 +1,28 @@
+on:
+  workflow_call:
+    inputs:
+      distribution-id:
+        type: string
+        required: false
+      paths:
+        type: string
+        required: false
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+jobs:
+  invalidate-cloudfront-cache:
+    name: Invalidate CloudFront cache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: nohmad/aws-cli-action@master
+        if: ${{ inputs.distribution-id && inputs.paths }}
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ap-northeast-2
+          args: |
+            cloudfront create-invalidation --distribution-id ${{inputs.distribution-id}} --paths ${{inputs.paths}}/*

@@ -1,4 +1,4 @@
-name: Reusable workflow to build image
+name: Reusable workflow to deploy to EKS
 on:
   workflow_call:
     inputs:
@@ -28,11 +28,12 @@ on:
         required: false
         type: string
         default: dotenv
-      config-file:
+      config-filename:
         required: false
         type: string
+        default: .env
         description: |
-          Name of dotenv file to dump parameters retrieved by *inputs.config-prefix*
+          Name of file to dump parameters retrieved by *inputs.config-path*
       docker-context:
         required: false
         default: .
@@ -50,12 +51,6 @@ on:
         type: string
       namespace:
         required: true
-        type: string
-      cloudfront-distribution-id:
-        required: false
-        type: string
-      cloudfront-paths:
-        required: false
         type: string
     secrets:
       AWS_ACCESS_KEY_ID:
@@ -159,14 +154,3 @@ jobs:
       uses: getmiso/kubectl-aws-eks@master
       with:
         args: rollout status deployment/${{inputs.deployment-name}} -n ${{inputs.namespace}}
-    - name: Invalidate CloudFront cache
-      if: ${{ inputs.cloudfront-distribution-id && inputs.cloudfront-paths }}
-      uses: nohmad/aws-cli-action@master
-      with:
-        aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-        aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-        aws-region: ap-northeast-2
-        args: |
-          cloudfront create-invalidation \
-            --distribution-id ${{inputs.cloudfront-distribution-id}} \
-            --paths ${{inputs.cloudfront-paths}}

@@ -1,4 +1,4 @@
-name: Reusable workflow to build image
+name: Reusable workflow to deploy to Docker Swarm
 on:
   workflow_call:
     inputs:
