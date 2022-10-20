@@ -1,3 +1,5 @@
+name: Invalidate CloudFront cache
+
 on:
   workflow_call:
     inputs:
