@@ -25,4 +25,4 @@ jobs:
           aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           aws-region: ap-northeast-2
           args: |
-            cloudfront create-invalidation --distribution-id ${{inputs.distribution-id}} --paths ${{inputs.paths}}/*
+            cloudfront create-invalidation --distribution-id ${{inputs.distribution-id}} --paths '${{inputs.paths}}'
