@@ -13,7 +13,7 @@ jobs:
     with:
       stage: ${{github.event.inputs.stage}}
       image-name: miso/${{github.event.repository.name}}
-      config-path: /config/app_name/${{github.event.inputs.stage}}
+      config-path: /config/${{github.event.repository.name}}/${{github.event.inputs.stage}}
       deployment-name: ${{github.event.repository.name}}
       namespace: xxx
     secrets: inherit
@@ -28,7 +28,7 @@ jobs:
     with:
       stage: ${{github.event.inputs.stage}}
       image-name: miso/${{github.event.repository.name}}
-      config-path: /config/app_name/${{github.event.inputs.stage}}
+      config-path: /config/${{github.event.repository.name}}/${{github.event.inputs.stage}}
       service-name: xxx_${{github.event.repository.name}}
       server-name: swarm-manager
     secrets: inherit
@@ -43,7 +43,7 @@ jobs:
     uses: getmiso/workflows/.github/workflows/deploy-serverless-nodejs.yml@main
     with:
       stage: ${{github.event.inputs.stage}}
-      config-path: /config/app_name/${{github.event.inputs.stage}}
+      config-path: /config/${{github.event.repository.name}}/${{github.event.inputs.stage}}
     secrets: inherit
 ```
 
@@ -55,7 +55,7 @@ jobs:
     uses: getmiso/workflows/.github/workflows/cloudfront-invalidate-cache.yml@main
     with:
       stage: ${{github.event.inputs.stage}}
-      config-path: /config/app_name/${{github.event.inputs.stage}}
+      config-path: /config/${{github.event.repository.name}}/${{github.event.inputs.stage}}
     secrets: inherit
 ```
 
@@ -68,6 +68,6 @@ jobs:
     with:
       stage: ${{github.event.inputs.stage}}
       image-name: miso/${{github.event.repository.name}}
-      config-path: /config/app_name/${{github.event.inputs.stage}}
+      config-path: /config/${{github.event.repository.name}}/${{github.event.inputs.stage}}
     secrets: inherit
 ```
