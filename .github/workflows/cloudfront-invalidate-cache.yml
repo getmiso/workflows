@@ -9,6 +9,10 @@ on:
       paths:
         type: string
         required: false
+      config-path:
+        required: false
+        type: string
+        description: Prefix of parameters' name, usually */config/app_name/production*.
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -28,3 +32,24 @@ jobs:
           aws-region: ap-northeast-2
           args: |
             cloudfront create-invalidation --distribution-id ${{inputs.distribution-id}} --paths '${{inputs.paths}}'
+      - name: Get env variables
+        if: inputs.config-path
+        id: ssm_variables
+        uses: nohmad/aws-ssm-parameter-store-action@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+          path: ${{inputs.config-path}}
+      - name: Invalidate CloudFront cache
+        uses: nohmad/aws-cli-action@master
+        if: ${{ inputs.config-path && steps.ssm_variables.outputs.CF_DISTRIBUTION_ID && steps.ssm_variables.outputs.BASE_PATH }}
+        env:
+          BASE_PATH: ${{steps.ssm_variables.outputs.BASE_PATH}}
+          CF_DISTRIBUTION_ID: ${{steps.ssm_variables.outputs.CF_DISTRIBUTION_ID}}
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ap-northeast-2
+          args: |
+            cloudfront create-invalidation --distribution-id $CF_DISTRIBUTION_ID --paths $BASE_PATH/*
