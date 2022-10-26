@@ -55,7 +55,8 @@ jobs:
     uses: getmiso/workflows/.github/workflows/cloudfront-invalidate-cache.yml@main
     with:
       stage: ${{github.event.inputs.stage}}
-      config-path: /config/${{github.event.repository.name}}/${{github.event.inputs.stage}}
+      distribution-id: cloudfront distribution ID
+      paths: /xxx/*
     secrets: inherit
 ```
 
