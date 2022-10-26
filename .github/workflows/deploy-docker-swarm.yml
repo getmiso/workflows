@@ -27,7 +27,7 @@ on:
         required: false
         type: string
         default: dotenv
-      config-file:
+      config-filename:
         required: false
         type: string
         description: Name of dotenv file to dump parameters retrieved by *inputs.config-path*
@@ -105,7 +105,7 @@ jobs:
         aws-region: ap-northeast-2
         path: ${{inputs.config-path}}
         format: ${{inputs.config-format}}
-        filename: ${{inputs.config-file}}
+        filename: ${{inputs.config-filename}}
     - name: Cache Docker layers
       uses: actions/cache@v2
       with:

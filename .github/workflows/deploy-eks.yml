@@ -106,7 +106,7 @@ jobs:
         aws-region: ap-northeast-2
         path: ${{inputs.config-path}}
         format: ${{inputs.config-format}}
-        filename: ${{inputs.config-file}}
+        filename: ${{inputs.config-filename}}
     - name: Cache Docker layers
       uses: actions/cache@v2
       with:
