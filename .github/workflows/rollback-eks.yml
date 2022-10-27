@@ -1,0 +1,51 @@
+name: Reusable workflow to rollback to one version before the last deployment version in EKS
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: "Stage to rollback: *production|staging*"
+        required: true
+        type: string
+      deployment-type:
+        description: "Type of deployment: deployment|statefulset|daemonset"
+        required: true
+        type: string
+        default: deployment
+      deployment-name:
+        required: true
+        type: string
+      namespace:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+jobs:
+  rollback-eks:
+    name: Rollback / ${{inputs.stage}}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Validate inputs
+      run: exit 1
+      if: ${{ !contains(fromJSON('["production","staging"]'), inputs.stage) }}
+    - uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
+    - name: Load KUBE_CONFIG to ENV
+      uses: aws-actions/aws-secretsmanager-get-secrets@v1
+      with:
+        secret-ids: |
+          KUBE_CONFIG_DATA, eks/${{inputs.stage}}/kubeconfig-data
+    - name: Rollback
+      uses: getmiso/kubectl-aws-eks@master
+      with:
+        args: |
+          rollout undo ${inputs.deployment-type}/${{inputs.deployment-name}} -n ${{inputs.namespace}}
+    - name: Verify Rollback
+      uses: getmiso/kubectl-aws-eks@master
+      with:
+        args: rollout status ${inputs.deployment-type}/${{inputs.deployment-name}} -n ${{inputs.namespace}}
