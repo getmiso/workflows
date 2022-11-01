@@ -120,7 +120,7 @@ jobs:
       with:
         install: true
     - name: Build docker image and Push to ECR
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
         context: ${{inputs.docker-context}}
         file: ${{inputs.docker-file}}
