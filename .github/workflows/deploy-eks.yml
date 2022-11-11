@@ -152,3 +152,8 @@ jobs:
       uses: getmiso/kubectl-aws-eks@master
       with:
         args: rollout status deployment/${{inputs.deployment-name}} -n ${{inputs.namespace}}
+    - name: Add version to rollout history
+      uses: getmiso/kubectl-aws-eks@master
+      with:
+        args: |
+          annotate deployment/${{inputs.deployment-name}} kubernetes.io/change-cause=${{steps.vars.outputs.release-version}} -n ${{inputs.namespace}} --overwrite=true
