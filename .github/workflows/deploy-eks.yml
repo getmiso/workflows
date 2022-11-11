@@ -148,6 +148,10 @@ jobs:
           set image deployment/${{inputs.deployment-name}} \
             ${{inputs.deployment-name}}=${{steps.vars.outputs.release-image}} \
             -n ${{inputs.namespace}}
+    - name: Rollout
+      uses: getmiso/kubectl-aws-eks@master
+      with:
+        args: rollout status deployment/${{inputs.deployment-name}} -n ${{inputs.namespace}}
     - name: Add cause to rollout
       uses: getmiso/kubectl-aws-eks@master
       with:
@@ -155,7 +159,3 @@ jobs:
           annotate deployment/${{inputs.deployment-name}} \
             kubernetes.io/change-cause="Image changed to ${{steps.vars.outputs.release-version}}" \
             -n ${{inputs.namespace}}
-    - name: Rollout
-      uses: getmiso/kubectl-aws-eks@master
-      with:
-        args: rollout status deployment/${{inputs.deployment-name}} -n ${{inputs.namespace}}
