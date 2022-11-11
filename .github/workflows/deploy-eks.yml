@@ -156,6 +156,4 @@ jobs:
       uses: getmiso/kubectl-aws-eks@master
       with:
         args: |
-          annotate deployment/${{inputs.deployment-name}} \
-            kubernetes.io/change-cause="Image changed to ${{steps.vars.outputs.release-version}}" \
-            -n ${{inputs.namespace}}
+          annotate deployment/${{inputs.deployment-name}} kubernetes.io/change-cause=${{steps.vars.outputs.release-version}} -n ${{inputs.namespace}}
