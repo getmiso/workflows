@@ -44,6 +44,11 @@ on:
         required: false
         default: Comma or line separated strings
         type: string
+      deployment-type:
+        description: "Type of deployment: deployment|statefulset|daemonset"
+        required: false
+        type: string
+        default: deployment
       deployment-name:
         required: true
         type: string
@@ -145,15 +150,15 @@ jobs:
       uses: getmiso/kubectl-aws-eks@master
       with:
         args: |
-          set image deployment/${{inputs.deployment-name}} \
+          set image ${{inputs.deployment-type}}/${{inputs.deployment-name}} \
             ${{inputs.deployment-name}}=${{steps.vars.outputs.release-image}} \
             -n ${{inputs.namespace}}
     - name: Rollout
       uses: getmiso/kubectl-aws-eks@master
       with:
-        args: rollout status deployment/${{inputs.deployment-name}} -n ${{inputs.namespace}}
+        args: rollout status ${{inputs.deployment-type}}/${{inputs.deployment-name}} -n ${{inputs.namespace}}
     - name: Add version to rollout history
       uses: getmiso/kubectl-aws-eks@master
       with:
         args: |
-          annotate deployment/${{inputs.deployment-name}} kubernetes.io/change-cause=${{steps.vars.outputs.release-version}} -n ${{inputs.namespace}} --overwrite=true
+          annotate ${{inputs.deployment-type}}/${{inputs.deployment-name}} kubernetes.io/change-cause=${{steps.vars.outputs.release-version}} -n ${{inputs.namespace}} --overwrite=true
