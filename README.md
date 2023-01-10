@@ -34,13 +34,13 @@ jobs:
     secrets: inherit
 ```
 
-### deploy-serverless-nodejs
-Runtimes other than nodejs may be deployable.
+### deploy-serverless
+Runtimes other than nodejs may also be deployable.
 ```yml
 jobs:
   deploy-docker-swarm:
     name: Deploy to Lambda / ${{inputs.stage}}
-    uses: getmiso/workflows/.github/workflows/deploy-serverless-nodejs.yml@main
+    uses: getmiso/workflows/.github/workflows/deploy-serverless.yml@main
     with:
       stage: ${{github.event.inputs.stage}}
       config-path: /config/${{github.event.repository.name}}/${{github.event.inputs.stage}}

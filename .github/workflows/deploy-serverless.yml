@@ -62,7 +62,7 @@ jobs:
         key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
 
     - name: Install dependencies
-      run: yarn install --immutable
+      run: yarn install --frozen-lockfile --production
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
       if: steps.yarn-cache.outputs.cache-hit != 'true'
